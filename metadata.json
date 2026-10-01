@@ -1,0 +1,6 @@
+{
+  "name": "Flood Alert System Wiring & Assembly Visualizer",
+  "description": "Interactive, highly recognizable wiring diagram and pinout guide for LilyGO TTGO T-SIM A7670G with external sensors and assembly checklist.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
