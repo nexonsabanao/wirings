@@ -149,14 +149,6 @@ export default function App() {
             onTouchEnd={handleTouchEnd}
             onWheel={handleWheel}
           >
-            {/* Top Alert Banner for Quick Safety Reminders */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-2xl w-full px-3">
-              <div className="bg-slate-900/95 backdrop-blur border border-cyan-500/30 p-2 sm:p-2.5 rounded-xl shadow-2xl flex items-center justify-end text-[11px] sm:text-xs text-slate-300">
-                <span className="text-[10px] sm:text-[11px] font-mono text-cyan-400 shrink-0 ml-2">
-                  {scale.toFixed(1)}x
-                </span>
-              </div>
-            </div>
 
             {/* Interactive Schematic SVG */}
             <InteractiveWiringSvg
