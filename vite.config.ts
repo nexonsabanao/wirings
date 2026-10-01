@@ -5,6 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages serves project sites under /<repo-name>/ — required for asset URLs to resolve.
+    base: process.env.VITE_BASE || '/wirings/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
