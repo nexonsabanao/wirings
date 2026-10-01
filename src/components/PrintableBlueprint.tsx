@@ -247,7 +247,7 @@ export const PrintableBlueprint: React.FC = () => {
                 <td className="p-1.5 border-r border-slate-200 text-slate-500">—</td>
                 <td className="p-1.5 border-r border-slate-200 font-bold">Power Out</td>
                 <td className="p-1.5 border-r border-slate-200 font-bold text-red-700">3.3V</td>
-                <td className="p-1.5 font-sans font-bold text-red-950">MAIN 3.3V RAIL: Powers AJ-SR04T VCC, BME280 VIN, BH1750 VCC, Rain Gauge VCC &amp; 10kΩ pull-up</td>
+                <td className="p-1.5 font-sans font-bold text-red-950">MAIN 3.3V RAIL: Powers AJ-SR04T VCC, BME280 VCC, BH1750 VCC, Rain Gauge VCC &amp; 10kΩ pull-up</td>
               </tr>
               <tr className="bg-slate-100/80">
                 <td className="p-1.5 font-bold border-r border-slate-200 text-slate-900">GND</td>

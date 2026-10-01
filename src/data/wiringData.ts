@@ -182,7 +182,7 @@ export const RIGHT_HEADER_PINS: BoardPin[] = [
     type: 'power',
     voltage: '3.3V Regulated',
     description: 'Main 3.3V Power Out Pin (Right Header Pin 1 — Powers all sensors & 10kΩ resistor)',
-    connectedTo: 'AJ-SR04T VCC, BME280 VIN, BH1750 VCC, Rain Gauge 10kΩ Resistor',
+    connectedTo: 'AJ-SR04T VCC, BME280 VCC, BH1750 VCC, Rain Gauge 10kΩ Resistor',
     isUsedInProject: true,
     isSinglePowerGnd: true,
   },
@@ -414,7 +414,7 @@ export const SENSORS: SensorModule[] = [
     addressOrProtocol: 'I2C Address: 0x76 (or 0x77)',
     accentColor: '#8b5cf6', // Purple
     pins: [
-      { id: 'bme-vin', name: 'VIN', label: 'VIN (3.3V)', type: 'power', voltage: '3.3V', connectedToBoardPin: 'V3V3 (Right Pin 1)', color: '#ef4444', notes: 'Connected to V3V3 Right Pin 1' },
+      { id: 'bme-vcc', name: 'VCC', label: 'VCC (3.3V)', type: 'power', voltage: '3.3V', connectedToBoardPin: 'V3V3 (Right Pin 1)', color: '#ef4444', notes: 'Connected to V3V3 Right Pin 1' },
       { id: 'bme-gnd', name: 'GND', label: 'GND (0V)', type: 'ground', voltage: '0V', connectedToBoardPin: 'GND (Right Pin 2)', color: '#1e293b', notes: 'Connected to GND Right Pin 2' },
       { id: 'bme-scl', name: 'SCL', label: 'SCL (Clock)', type: 'i2c', voltage: '3.3V', connectedToBoardPin: 'IO33 (Right Pin 4)', color: '#eab308' },
       { id: 'bme-sda', name: 'SDA', label: 'SDA (Data)', type: 'i2c', voltage: '3.3V', connectedToBoardPin: 'IO32 (Right Pin 3)', color: '#06b6d4' },
@@ -623,17 +623,17 @@ export const WIRE_CONNECTIONS: WireConnection[] = [
   // BME280 SENSOR WIRES
   // ==========================================
   {
-    id: 'w-bme-vin',
+    id: 'w-bme-vcc',
     sourceSensorId: 'bme280',
-    sourcePinName: 'VIN',
+    sourcePinName: 'VCC',
     targetBoardPinId: 'right-1',
     targetPinLabel: 'V3V3 (Right Pin 1)',
     color: '#ef4444',
     colorName: 'Red',
-    signalName: 'BME280 VIN (3.3V)',
+    signalName: 'BME280 VCC (3.3V)',
     signalType: 'power',
     voltage: '3.3V',
-    description: 'BME280 VIN connected to V3V3 (Right Pin 1)',
+    description: 'BME280 VCC connected to V3V3 (Right Pin 1)',
   },
   {
     id: 'w-bme-gnd',
@@ -790,7 +790,7 @@ export const ASSEMBLY_STEPS: AssemblyStep[] = [
     description: 'Connect all external sensor VCC leads to V3V3 (Right Pin 1) and all GND leads to GND (Right Pin 2).',
     checklist: [
       { id: 'c1-1', text: 'Connect Ultrasonic VCC & GND', detail: 'Wire AJ-SR04T VCC to V3V3 (Right Pin 1) and GND to GND (Right Pin 2).' },
-      { id: 'c1-2', text: 'Connect BME280 VIN & GND', detail: 'Wire BME280 VIN to V3V3 (Right Pin 1) and GND to GND (Right Pin 2).' },
+      { id: 'c1-2', text: 'Connect BME280 VCC & GND', detail: 'Wire BME280 VCC to V3V3 (Right Pin 1) and GND to GND (Right Pin 2).' },
       { id: 'c1-3', text: 'Connect BH1750 VCC & GND', detail: 'Wire BH1750 VCC to V3V3 (Right Pin 1) and GND to GND (Right Pin 2).' },
       { id: 'c1-4', text: 'Connect Rain Gauge VCC & GND', detail: 'Wire Rain Gauge VCC to V3V3 (Right Pin 1) and GND to GND (Right Pin 2).' },
       { id: 'c1-5', text: 'Verify 3.3V with Multimeter', detail: 'Confirm steady 3.30V between Right Pin 1 (V3V3) and Right Pin 2 (GND).' },

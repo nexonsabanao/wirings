@@ -109,7 +109,7 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
       // Top-Right: BME280 (Card at X: 1050, Y: 65, Left-edge X = 1050)
       case 'bme280': {
         const baseX = 1050;
-        if (pinName === 'VIN') return { x: baseX, y: 115 };
+        if (pinName === 'VCC') return { x: baseX, y: 115 };
         if (pinName === 'GND') return { x: baseX, y: 145 };
         if (pinName === 'SCL') return { x: baseX, y: 175 };
         if (pinName === 'SDA') return { x: baseX, y: 205 };
@@ -386,7 +386,7 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
           {/* Left Column: Clean Terminal Header Rows (Nodes at X=1050) */}
           <g transform="translate(1050, 115)">
             {[
-              { name: 'VIN', label: 'V3V3 (Right Pin 1)', col: '#ef4444', y: 0 },
+              { name: 'VCC', label: 'V3V3 (Right Pin 1)', col: '#ef4444', y: 0 },
               { name: 'GND', label: 'GND (Right Pin 2)', col: '#94a3b8', y: 30 },
               { name: 'SCL', label: 'IO33 (Right Pin 4)', col: '#eab308', y: 60 },
               { name: 'SDA', label: 'IO32 (Right Pin 3)', col: '#06b6d4', y: 90 },
