@@ -13,7 +13,6 @@ import {
   AlertTriangle,
   Info,
   ShieldCheck,
-  Zap,
   HelpCircle,
   Maximize2,
   Minimize2,
@@ -152,13 +151,7 @@ export default function App() {
           >
             {/* Top Alert Banner for Quick Safety Reminders */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-2xl w-full px-3">
-              <div className="bg-slate-900/95 backdrop-blur border border-cyan-500/30 p-2 sm:p-2.5 rounded-xl shadow-2xl flex items-center justify-between text-[11px] sm:text-xs text-slate-300">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Zap size={14} className="text-cyan-400 shrink-0" />
-                  <span>
-                    <strong className="text-cyan-300">Active Focus Mode:</strong> Selecting or hovering a sensor dims all other wires automatically.
-                  </span>
-                </div>
+              <div className="bg-slate-900/95 backdrop-blur border border-cyan-500/30 p-2 sm:p-2.5 rounded-xl shadow-2xl flex items-center justify-end text-[11px] sm:text-xs text-slate-300">
                 <span className="text-[10px] sm:text-[11px] font-mono text-cyan-400 shrink-0 ml-2">
                   {scale.toFixed(1)}x
                 </span>
