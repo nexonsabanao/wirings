@@ -5,7 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: process.env.VITE_BASE || '/',
+    // Auto-detect GitHub Actions environment for GitHub Pages subpath vs root in AI Studio
+    base: process.env.VITE_BASE || (process.env.GITHUB_ACTIONS ? '/wirings/' : '/'),
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
