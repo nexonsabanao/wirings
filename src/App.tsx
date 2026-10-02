@@ -208,7 +208,11 @@ export default function App() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-orange-600" />
-                    <span className="text-slate-300 font-mono">Orange: Rain (34)</span>
+                    <span className="text-slate-300 font-mono">Yellow: Rain (34)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                    <span className="text-slate-300 font-mono">100nF Cap (IO34-GND)</span>
                   </div>
                 </div>
               </div>

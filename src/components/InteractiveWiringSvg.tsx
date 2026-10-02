@@ -34,6 +34,7 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
   const [hoveredPin, setHoveredPin] = useState<string | null>(null);
   const [hoveredSensor, setHoveredSensor] = useState<string | null>(null);
   const [hoveredResistor, setHoveredResistor] = useState<boolean>(false);
+  const [hoveredCapacitor, setHoveredCapacitor] = useState<boolean>(false);
 
   // Active focused sensor determination
   const activeFocusSensor =
@@ -174,6 +175,16 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
 
   const resistorOpacity = activeFocusSensor && !isResistorActive ? 0.1 : 1;
 
+  const isCapacitorActive =
+    hoveredCapacitor ||
+    selectedWireId === 'capacitor-100nf' ||
+    selectedFilter === 'rain' ||
+    selectedFilter === 'power' ||
+    activeFocusSensor === 'rain_gauge' ||
+    activeFocusSensor === 'rain';
+
+  const capacitorOpacity = activeFocusSensor && !isCapacitorActive ? 0.1 : 1;
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-950 select-none cursor-grab active:cursor-grabbing flex items-center justify-center touch-none">
       <svg
@@ -229,6 +240,14 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
             <stop offset="55%" stopColor="#ddb892" />
             <stop offset="85%" stopColor="#b08968" />
             <stop offset="100%" stopColor="#7f5539" />
+          </linearGradient>
+
+          {/* Capacitor Gradients */}
+          <linearGradient id="ceramicCapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fbbf24" />
+            <stop offset="35%" stopColor="#f59e0b" />
+            <stop offset="70%" stopColor="#d97706" />
+            <stop offset="100%" stopColor="#92400e" />
           </linearGradient>
 
           <linearGradient id="metalLeadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -585,17 +604,17 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
             </text>
           </g>
 
-          {/* Bottom Card: Explicit Pull-Up Resistor Callout */}
+          {/* Bottom Card: Explicit RC Debounce Network Callout */}
           <g transform="translate(1062, 665)">
             <rect x="0" y="0" width="320" height="52" rx="6" fill="#7f1d1d" fillOpacity="0.85" stroke="#ef4444" strokeWidth="1.5" />
-            <text x="10" y="16" fill="#fef2f2" fontSize="10" fontWeight="bold">
-              ⚠️ MANDATORY 10kΩ PULL-UP RESISTOR
+            <text x="10" y="16" fill="#fef2f2" fontSize="9.5" fontWeight="bold">
+              ⚠️ MANDATORY RC DEBOUNCE NETWORK
             </text>
-            <text x="10" y="30" fill="#fca5a5" fontSize="8.5">
-              ESP32 GPIO 34 has NO internal pull-up.
+            <text x="10" y="30" fill="#fca5a5" fontSize="8">
+              • 10 kΩ pull-up resistor: Right Pin 5 (IO34) ↔ Pin 1 (V3V3)
             </text>
-            <text x="10" y="44" fill="#fed7aa" fontSize="8.5" fontWeight="600">
-              Install 10kΩ resistor bridging Right Pin 5 (IO34) &amp; Pin 1 (V3V3).
+            <text x="10" y="43" fill="#fed7aa" fontSize="8" fontWeight="600">
+              • 100 nF (104) ceramic cap: Right Pin 5 (IO34) ↔ Pin 2 (GND)
             </text>
           </g>
 
@@ -605,8 +624,8 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
             <text x="10" y="16" fill="#38bdf8" fontSize="9.5" fontWeight="bold">
               💡 Wiring: YELLOW ➔ IO34 | VCC ➔ V3V3 | GND ➔ GND
             </text>
-            <text x="10" y="30" fill="#94a3b8" fontSize="8.5">
-              Connect 10kΩ resistor across IO34 and V3V3 on the LilyGO board.
+            <text x="10" y="30" fill="#94a3b8" fontSize="8">
+              Hardware RC filter (1.0ms τ) eliminates reed switch bounce.
             </text>
           </g>
         </g>
@@ -1131,26 +1150,126 @@ export const InteractiveWiringSvg: React.FC<InteractiveWiringSvgProps> = ({
             </g>
 
             {/* Resistor Callout Badge */}
-            <g transform="translate(978, 300)">
+            <g transform="translate(972, 290)">
               <rect
                 x="0"
                 y="0"
-                width="60"
-                height="50"
+                width="54"
+                height="46"
                 rx="6"
                 fill="#0f172a"
                 stroke={isResistorActive ? '#f97316' : '#ea580c'}
                 strokeWidth={isResistorActive ? 2 : 1.2}
                 filter="url(#glow)"
               />
-              <text x="30" y="18" textAnchor="middle" fill="#f8fafc" fontSize="10" fontWeight="bold" fontFamily="monospace">
+              <text x="27" y="16" textAnchor="middle" fill="#f8fafc" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
                 10 kΩ
               </text>
-              <text x="30" y="31" textAnchor="middle" fill="#fed7aa" fontSize="7.5" fontWeight="600">
+              <text x="27" y="28" textAnchor="middle" fill="#fed7aa" fontSize="7" fontWeight="600">
                 PULL-UP
               </text>
-              <text x="30" y="43" textAnchor="middle" fill="#94a3b8" fontSize="6.5">
+              <text x="27" y="39" textAnchor="middle" fill="#94a3b8" fontSize="6.5">
                 IO34 ↔ 3V3
+              </text>
+            </g>
+          </g>
+
+          {/* ========================================================================= */}
+          {/* 100 nF (104) 50V CERAMIC CAPACITOR (X7R) BRIDGING RIGHT PIN 5 (IO34) TO PIN 2 (GND) */}
+          {/* ========================================================================= */}
+          <g
+            id="visible-100nf-capacitor-assembly"
+            className="cursor-pointer transition-opacity duration-300"
+            style={{ opacity: capacitorOpacity }}
+            onMouseEnter={() => setHoveredCapacitor(true)}
+            onMouseLeave={() => setHoveredCapacitor(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectWire(selectedWireId === 'capacitor-100nf' ? null : 'capacitor-100nf');
+            }}
+          >
+            {/* Top Connecting Wire: Capacitor Top Lead ➔ Right Header Pin 2 (GND at X=875, Y=287.5) */}
+            <path
+              d="M 995 322 L 995 287.5 L 875 287.5"
+              fill="none"
+              stroke="#64748b"
+              strokeWidth={isCapacitorActive ? 3.5 : 2.5}
+              strokeLinecap="round"
+              filter={isCapacitorActive ? 'url(#glow)' : undefined}
+            />
+            {/* GND Junction Node at Right Header Pin 2 (GND) */}
+            <circle cx="875" cy="287.5" r="5.5" fill="#334155" stroke="#ffffff" strokeWidth="1.5" />
+
+            {/* Bottom Connecting Wire: Capacitor Bottom Lead ➔ Right Header Pin 5 (IO34 at X=875, Y=385) */}
+            <path
+              d="M 995 362 L 995 385 L 875 385"
+              fill="none"
+              stroke="#f97316"
+              strokeWidth={isCapacitorActive ? 3.5 : 2.5}
+              strokeLinecap="round"
+              filter={isCapacitorActive ? 'url(#glow)' : undefined}
+            />
+            {/* Orange Junction Node at Right Header Pin 5 (IO34) */}
+            <circle cx="875" cy="385" r="5.5" fill="#f97316" stroke="#ffffff" strokeWidth="1.5" />
+
+            {/* Metallic Lead Wires */}
+            <line x1="995" y1="310" x2="995" y2="326" stroke="url(#metalLeadGrad)" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="995" y1="358" x2="995" y2="374" stroke="url(#metalLeadGrad)" strokeWidth="2.5" strokeLinecap="round" />
+
+            {/* Ceramic Disc Capacitor Body */}
+            <g transform="translate(995, 342)">
+              {/* Disc Shadow & Body */}
+              <ellipse
+                cx="0"
+                cy="0"
+                rx="16"
+                ry="18"
+                fill="url(#ceramicCapGrad)"
+                stroke={isCapacitorActive ? '#fbbf24' : '#b45309'}
+                strokeWidth={isCapacitorActive ? 2.2 : 1.2}
+                filter="drop-shadow(0 4px 10px rgba(0,0,0,0.8))"
+              />
+
+              {/* Specular curved highlight */}
+              <path
+                d="M -10 -8 A 12 14 0 0 1 8 -12"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="1.5"
+                opacity="0.5"
+                strokeLinecap="round"
+              />
+
+              {/* Capacitor Code Markings (104 & 50V) */}
+              <text x="0" y="-1" textAnchor="middle" fill="#451a03" fontSize="8.5" fontWeight="900" fontFamily="monospace">
+                104
+              </text>
+              <text x="0" y="9" textAnchor="middle" fill="#78350f" fontSize="6.5" fontWeight="bold" fontFamily="monospace">
+                50V
+              </text>
+            </g>
+
+            {/* Capacitor Callout Badge */}
+            <g transform="translate(1020, 342)">
+              <rect
+                x="0"
+                y="0"
+                width="64"
+                height="46"
+                rx="6"
+                fill="#0f172a"
+                stroke={isCapacitorActive ? '#fbbf24' : '#d97706'}
+                strokeWidth={isCapacitorActive ? 2 : 1.2}
+                filter="url(#glow)"
+              />
+              <text x="32" y="15" textAnchor="middle" fill="#fde68a" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                100 nF
+              </text>
+              <text x="32" y="27" textAnchor="middle" fill="#fdba74" fontSize="7" fontWeight="600">
+                50V X7R (104)
+              </text>
+              <text x="32" y="38" textAnchor="middle" fill="#94a3b8" fontSize="6.5">
+                IO34 ↔ GND
               </text>
             </g>
           </g>

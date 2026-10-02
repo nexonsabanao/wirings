@@ -130,7 +130,7 @@ export const NavigationHeader: React.FC<NavigationHeaderProps> = ({
                 { id: 'all', label: 'All Circuits' },
                 { id: 'ultrasonic', label: '🌊 Ultrasonic (IO14/36)' },
                 { id: 'i2c', label: '🌡️ I²C Weather (IO32/33)' },
-                { id: 'rain', label: '🌧️ Rain Gauge + 10k (IO34)' },
+                { id: 'rain', label: '🌧️ Rain + RC Filter (IO34)' },
                 { id: 'power', label: '⚡ V3V3 (3.3V) & GND (Right)' },
               ].map((f) => (
                 <button

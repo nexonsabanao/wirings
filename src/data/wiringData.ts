@@ -181,8 +181,8 @@ export const RIGHT_HEADER_PINS: BoardPin[] = [
     label: 'V3V3',
     type: 'power',
     voltage: '3.3V Regulated',
-    description: 'Main 3.3V Power Out Pin (Right Header Pin 1 — Powers all sensors & 10kΩ resistor)',
-    connectedTo: 'AJ-SR04T VCC, BME280 VCC, BH1750 VCC, Rain Gauge 10kΩ Resistor',
+    description: 'Main 3.3V Power Out Pin (Right Header Pin 1 — Powers all sensors & 10kΩ pull-up resistor)',
+    connectedTo: 'AJ-SR04T VCC, BME280 VCC, BH1750 VCC, Rain Gauge 10kΩ Resistor & VCC',
     isUsedInProject: true,
     isSinglePowerGnd: true,
   },
@@ -193,8 +193,8 @@ export const RIGHT_HEADER_PINS: BoardPin[] = [
     label: 'GND',
     type: 'ground',
     voltage: '0V',
-    description: 'System Ground (Right Header Pin 2 — Common ground return for all external sensors)',
-    connectedTo: 'AJ-SR04T GND, BME280 GND, BH1750 GND, Rain Gauge GND',
+    description: 'System Ground (Right Header Pin 2 — Common ground return for all sensors & 100nF debounce capacitor)',
+    connectedTo: 'AJ-SR04T GND, BME280 GND, BH1750 GND, Rain Gauge GND, 100nF Debounce Capacitor',
     isUsedInProject: true,
     isSinglePowerGnd: true,
   },
@@ -232,9 +232,9 @@ export const RIGHT_HEADER_PINS: BoardPin[] = [
     gpio: 34,
     type: 'gpio_in',
     voltage: '3.3V Max',
-    description: 'Rain Gauge Tipping Bucket Interrupt Input (Input-Only Pin)',
-    connectedTo: 'Rain Gauge Reed Switch Lead 1 + External 10kΩ Pull-Up Resistor to V3V3',
-    warning: 'CRITICAL: GPIO 34 is input-only and HAS NO INTERNAL PULL-UP. An external 10kΩ resistor connected to V3V3 (Right Pin 1) is mandatory!',
+    description: 'Rain Gauge Tipping Bucket Interrupt Input (Input-Only with 10kΩ Pull-Up & 100nF Debounce Cap)',
+    connectedTo: 'Rain Gauge YELLOW Lead + 10kΩ Pull-Up to V3V3 + 100nF Ceramic Capacitor (104, 50V X7R) to GND',
+    warning: 'CRITICAL: GPIO 34 is input-only and HAS NO INTERNAL PULL-UP. An external 10kΩ pull-up resistor to V3V3 (Right Pin 1) and a 100nF ceramic capacitor (104, 50V X7R) to GND (Right Pin 2) form a mandatory 1.0 ms RC hardware debounce filter.',
     isUsedInProject: true,
     codeDefine: 'RAIN_GAUGE_PIN',
   },
@@ -457,29 +457,33 @@ export const SENSORS: SensorModule[] = [
   },
   {
     id: 'rain_gauge',
-    name: 'Tipping Bucket Rain Gauge',
+    name: 'Tipping Bucket Rain Gauge & RC Filter',
     category: 'precipitation',
-    description: 'Precision tipping bucket rainfall sensor (3 wires: YELLOW, VCC, GND). Includes 10kΩ pull-up resistor across IO34 and V3V3.',
+    description: 'Precision tipping bucket rainfall sensor (3 wires: YELLOW, VCC, GND). Includes 10kΩ pull-up resistor (IO34 ↔ V3V3) and 100nF (104) 50V X7R ceramic debounce capacitor (IO34 ↔ GND).',
     location: 'bottom-right',
     operatingVoltage: '3.3V DC (Connected to V3V3 Right Pin 1)',
     interfaceType: 'Hardware GPIO Interrupt (FALLING on IO34)',
     accentColor: '#f97316', // Orange
     pins: [
-      { id: 'rg-yellow', name: 'YELLOW', label: 'YELLOW (Signal)', type: 'gpio_in', voltage: '3.3V', connectedToBoardPin: 'IO34 (Right Pin 5)', color: '#eab308', notes: 'Rain pulse interrupt connected to IO34 (Right Pin 5)' },
+      { id: 'rg-yellow', name: 'YELLOW', label: 'YELLOW (Signal ➔ IO34)', type: 'gpio_in', voltage: '3.3V', connectedToBoardPin: 'IO34 (Right Pin 5)', color: '#eab308', notes: 'Rain pulse interrupt to IO34. Filtered by 10kΩ pull-up & 100nF ceramic capacitor.' },
       { id: 'rg-vcc', name: 'VCC', label: 'VCC (3.3V Power)', type: 'power', voltage: '3.3V', connectedToBoardPin: 'V3V3 (Right Pin 1)', color: '#ef4444', notes: 'Connected to V3V3 (Right Pin 1)' },
-      { id: 'rg-gnd', name: 'GND', label: 'GND (0V Ground)', type: 'ground', voltage: '0V', connectedToBoardPin: 'GND (Right Pin 2)', color: '#1e293b', notes: 'Connected to GND (Right Pin 2)' },
+      { id: 'rg-gnd', name: 'GND', label: 'GND (0V Ground)', type: 'ground', voltage: '0V', connectedToBoardPin: 'GND (Right Pin 2)', color: '#1e293b', notes: 'Connected to GND (Right Pin 2) & 100nF capacitor ground leg' },
     ],
     notes: [
       '3-wire connection: YELLOW goes to IO34 (Right Pin 5), VCC goes to V3V3 (Right Pin 1), and GND goes to GND (Right Pin 2).',
       'An external 10 kΩ pull-up resistor is installed bridging IO34 (Right Pin 5) and V3V3 (Right Pin 1).',
-      'Each bucket tip momentarily pulls GPIO 34 from 3.3V HIGH down to 0V LOW.',
+      'A 100 nF ceramic capacitor (code 104, 50V X7R) is installed bridging GPIO 34 (Right Pin 5) to GND (Right Pin 2).',
+      'Hardware RC Filter (R=10kΩ, C=100nF) creates a ~1.0 ms debounce time constant (τ = R × C) to suppress mechanical reed switch chatter/arcing and eliminate false rain pulse interrupts.',
+      'Each bucket tip momentarily pulls GPIO 34 from 3.3V HIGH down to 0V LOW cleanly without bouncing.',
     ],
     criticalWarnings: [
       'CRITICAL: GPIO 34 is an INPUT-ONLY pin on ESP32 and HAS NO INTERNAL PULL-UP RESISTOR! You MUST install an external 10 kΩ resistor between GPIO 34 (Right Pin 5) and V3V3 (Right Pin 1).',
+      'MANDATORY DEBOUNCE: Solder/connect a 100 nF (0.1 µF, marked 104, 50V X7R) ceramic capacitor between GPIO 34 (Right Pin 5) and GND (Right Pin 2) to prevent false rain counts from mechanical contact bounce.',
     ],
     firmwareDefines: [
-      { name: 'RAIN_GAUGE_PIN', value: '34', desc: 'Interrupt pin (Requires external 10kΩ pull-up)' },
+      { name: 'RAIN_GAUGE_PIN', value: '34', desc: 'Interrupt pin (With 10kΩ pull-up + 100nF RC debounce)' },
       { name: 'RAIN_MM_PER_TIP', value: '0.2794', desc: 'Calibrated rainfall volume per bucket flip' },
+      { name: 'RAIN_RC_DEBOUNCE_MS', value: '1', desc: 'Hardware RC low-pass filter (10kΩ × 100nF = 1.0 ms)' },
     ],
   },
   {
@@ -736,7 +740,7 @@ export const WIRE_CONNECTIONS: WireConnection[] = [
   },
 
   // ==========================================
-  // RAIN GAUGE WIRES (3-WIRE: YELLOW, VCC, GND) & 10k PULLUP RESISTOR
+  // RAIN GAUGE WIRES (3-WIRE: YELLOW, VCC, GND) & RC DEBOUNCE NETWORK (10kΩ + 100nF)
   // ==========================================
   {
     id: 'w-rain-sig',
@@ -749,7 +753,7 @@ export const WIRE_CONNECTIONS: WireConnection[] = [
     signalName: 'Rain Signal (YELLOW ➔ IO34)',
     signalType: 'gpio_in',
     voltage: '3.3V logic',
-    description: 'Tipping bucket YELLOW wire connected to GPIO 34 (Right Pin 5)',
+    description: 'Tipping bucket YELLOW wire connected to GPIO 34 (Right Pin 5) with 10kΩ pull-up & 100nF (104) debounce cap',
     isCritical: true,
     codeDefine: 'RAIN_GAUGE_PIN (34)',
   },
@@ -777,7 +781,7 @@ export const WIRE_CONNECTIONS: WireConnection[] = [
     signalName: 'Rain GND (0V)',
     signalType: 'ground',
     voltage: '0V',
-    description: 'Tipping bucket GND wire connected to GND (Right Pin 2)',
+    description: 'Tipping bucket GND wire connected to GND (Right Pin 2) along with 100nF capacitor ground pin',
   },
 ];
 
@@ -831,18 +835,20 @@ export const ASSEMBLY_STEPS: AssemblyStep[] = [
   },
   {
     id: 4,
-    title: 'Tipping Bucket Rain Gauge (3 Wires) & 10kΩ Pull-Up',
+    title: 'Tipping Bucket Rain Gauge (3 Wires) & RC Debounce Filter',
     category: 'Precipitation Subsystem',
-    estimatedTime: '10 mins',
-    description: 'Wire the 3 leads of the rain gauge (YELLOW to IO34, VCC to V3V3, GND to GND), plus install the 10 kΩ pull-up resistor across IO34 and V3V3.',
+    estimatedTime: '12 mins',
+    description: 'Wire the 3 leads of the rain gauge (YELLOW to IO34, VCC to V3V3, GND to GND), install the 10 kΩ pull-up resistor across IO34 and V3V3, and install the 100 nF ceramic capacitor (104, 50V X7R) across IO34 and GND for hardware debounce.',
     checklist: [
       { id: 'c4-1', text: 'Wire YELLOW Signal Lead to IO34', detail: 'Connect the YELLOW wire from the rain gauge to LilyGO GPIO 34 (Right Pin 5).' },
       { id: 'c4-2', text: 'Wire VCC Lead to V3V3', detail: 'Connect the VCC (power) wire from the rain gauge to V3V3 (Right Pin 1).' },
       { id: 'c4-3', text: 'Wire GND Lead to GND', detail: 'Connect the GND (ground) wire from the rain gauge to GND (Right Pin 2).' },
-      { id: 'c4-4', text: 'Install 10kΩ Pull-Up Resistor', detail: 'Install a 10 kΩ resistor bridging GPIO 34 (Right Pin 5) to V3V3 (Right Pin 1). Mandatory!' },
+      { id: 'c4-4', text: 'Install 10kΩ Pull-Up Resistor', detail: 'Install a 10 kΩ resistor bridging GPIO 34 (Right Pin 5) to V3V3 (Right Pin 1). Mandatory because GPIO 34 lacks internal pull-ups!' },
+      { id: 'c4-5', text: 'Install 100nF Ceramic Debounce Capacitor', detail: 'Install a 100 nF (0.1 µF, marked 104, 50V X7R) ceramic capacitor bridging GPIO 34 (Right Pin 5) to GND (Right Pin 2) to filter mechanical switch bounce.' },
     ],
     pitfalls: [
-      'GPIO 34 is input-only on the ESP32 and has NO internal pull-up. An external 10kΩ resistor across IO34 and V3V3 is strictly required.',
+      'GPIO 34 is input-only on the ESP32 and has NO internal pull-up. The 10kΩ pull-up to V3V3 is strictly required.',
+      'Without the 100nF capacitor across GPIO 34 and GND, mechanical reed switch contact bounce can trigger multiple false bucket tip counts per drop.',
     ],
   },
   {
@@ -889,9 +895,13 @@ export const FIRMWARE_PIN_DEFINITIONS_CODE = `// ===============================
 #define I2C_SCL                 33   // I2C Clock line (IO33)
 
 // Rain Gauge (Tipping Bucket Reed Switch)
-// ⚠️ CRITICAL: GPIO 34 is input-only. Requires external 10kΩ pull-up to V3V3!
+// ⚠️ HARDWARE RC DEBOUNCE NETWORK:
+// 1. External 10kΩ pull-up resistor from GPIO 34 to V3V3 (Right Pin 1)
+// 2. 100nF ceramic capacitor, 50V (X7R) code 104 from GPIO 34 to GND (Right Pin 2)
+// Time constant τ = R × C = 10kΩ × 100nF = 1.0 ms (filters mechanical contact chatter)
 #define RAIN_GAUGE_PIN          34   // Hardware interrupt pin (FALLING on IO34)
 #define RAIN_MM_PER_TIP         0.2794 // Rainfall calibration constant (mm)
+#define RAIN_DEBOUNCE_MS        50   // Optional software lockout window (ms)
 
 // AJ-SR04T / JSN-SR04T Waterproof Ultrasonic Sensor (Water Level)
 #define ULTRASONIC_TRIG         14   // Output 10µs pulse to start sound wave (IO14)
@@ -901,3 +911,4 @@ export const FIRMWARE_PIN_DEFINITIONS_CODE = `// ===============================
 // Cellular APN Configuration
 const char apn[] = "internet.globe.com";
 `;
+

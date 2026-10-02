@@ -68,7 +68,7 @@ export const PrintableBlueprint: React.FC = () => {
               I²C Weather: IO32 (SDA) / IO33 (SCL)
             </div>
             <div className="p-1.5 bg-slate-100 rounded border border-slate-200 font-bold text-slate-800">
-              Rain: IO34 (Int) + 10kΩ Pull-Up
+              Rain: IO34 + 10kΩ &amp; 100nF (104)
             </div>
             <div className="p-1.5 bg-slate-100 rounded border border-slate-200 font-bold text-slate-800">
               Built-in: GPS (21/22) &bull; LTE (26/27)
@@ -193,14 +193,14 @@ export const PrintableBlueprint: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Pin 5 Rain + 10k resistor */}
+                  {/* Pin 5 Rain + 10k resistor & 100nF capacitor */}
                   <div className="p-2 bg-amber-50 border border-amber-300 rounded">
                     <div className="font-bold text-amber-900 text-[11px] flex justify-between">
-                      <span>Pin 5 &bull; GPIO 34 (RAIN INT)</span>
-                      <span className="text-[10px] bg-amber-200 text-amber-900 px-1 rounded">Input + 10kΩ</span>
+                      <span>Pin 5 &bull; GPIO 34 (RAIN INT &bull; RC Filter)</span>
+                      <span className="text-[10px] bg-amber-200 text-amber-900 px-1 rounded">Input + RC Filter</span>
                     </div>
-                    <div className="text-[10.5px] text-amber-900 font-sans mt-1">
-                      Connects to <strong>YELLOW</strong> signal wire from Tipping Bucket. ⚠️ <strong>10kΩ Resistor</strong> must bridge Pin 5 (IO34) to Pin 1 (V3V3).
+                    <div className="text-[10.5px] text-amber-900 font-sans mt-1 leading-relaxed">
+                      Connects to <strong>YELLOW</strong> signal wire from Tipping Bucket. ⚠️ <strong>10kΩ Resistor</strong> bridges Pin 5 (IO34) to Pin 1 (V3V3), and <strong>100nF Ceramic Cap (104, 50V X7R)</strong> bridges Pin 5 (IO34) to Pin 2 (GND) for 1.0 ms hardware debounce.
                     </div>
                   </div>
 
@@ -255,7 +255,7 @@ export const PrintableBlueprint: React.FC = () => {
                 <td className="p-1.5 border-r border-slate-200 text-slate-500">—</td>
                 <td className="p-1.5 border-r border-slate-200 font-bold">Ground</td>
                 <td className="p-1.5 border-r border-slate-200">0V</td>
-                <td className="p-1.5 font-sans font-bold text-slate-900">COMMON GROUND: Common ground return for AJ-SR04T, BME280, BH1750, Rain Gauge</td>
+                <td className="p-1.5 font-sans font-bold text-slate-900">COMMON GROUND: Ground return for AJ-SR04T, BME280, BH1750, Rain Gauge, 100nF Cap</td>
               </tr>
               <tr>
                 <td className="p-1.5 font-bold border-r border-slate-200">I2C_SDA</td>
@@ -279,7 +279,7 @@ export const PrintableBlueprint: React.FC = () => {
                 <td className="p-1.5 border-r border-slate-200 font-bold text-amber-900">34</td>
                 <td className="p-1.5 border-r border-slate-200 font-bold">Input (INT)</td>
                 <td className="p-1.5 border-r border-slate-200">3.3V Max</td>
-                <td className="p-1.5 font-sans font-bold text-amber-950">Rain Gauge YELLOW wire. ⚠️ MUST install 10kΩ resistor bridging IO34 (Right #5) to V3V3 (Right #1)</td>
+                <td className="p-1.5 font-sans font-bold text-amber-950">Rain Gauge YELLOW wire. ⚠️ RC DEBOUNCE: 10kΩ pull-up to V3V3 (Right #1) + 100nF ceramic cap (104, 50V X7R) to GND (Right #2)</td>
               </tr>
               <tr>
                 <td className="p-1.5 font-bold border-r border-slate-200">ULTRASONIC_TRIG</td>
@@ -357,13 +357,14 @@ export const PrintableBlueprint: React.FC = () => {
             <div className="p-3 bg-slate-50 border border-slate-300 rounded-lg space-y-1.5">
               <div className="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between">
                 <span>Tipping Bucket Rain Gauge</span>
-                <span className="font-mono text-[10px] text-amber-700">3-Wire + 10kΩ</span>
+                <span className="font-mono text-[10px] text-amber-700">3-Wire + RC Debounce</span>
               </div>
               <div className="font-mono text-[10.5px] space-y-0.5">
                 <div><span className="text-yellow-600 font-bold">YELLOW (Signal):</span> Right Pin 5 (IO34)</div>
                 <div><span className="text-red-600 font-bold">VCC (Red):</span> Right Pin 1 (V3V3)</div>
                 <div><span className="text-slate-700 font-bold">GND (Black):</span> Right Pin 2 (GND)</div>
-                <div className="text-red-700 font-bold text-[10px]">⚠️ 10kΩ Resistor bridged: IO34 ↔ V3V3</div>
+                <div className="text-red-700 font-bold text-[10px]">⚠️ 10kΩ Pull-Up: IO34 ↔ V3V3</div>
+                <div className="text-amber-800 font-bold text-[10px]">⚡ 100nF Cap (104, 50V X7R): IO34 ↔ GND</div>
               </div>
             </div>
           </div>
@@ -382,7 +383,7 @@ export const PrintableBlueprint: React.FC = () => {
               <strong>Single 3.3V Power Rail:</strong> Wire all sensor power leads directly to <strong>Right Header Pin 1 (V3V3)</strong> and all ground leads to <strong>Right Header Pin 2 (GND)</strong>. Never connect external 5V to the sensor headers.
             </li>
             <li>
-              <strong>Rain Gauge 10kΩ Pull-Up:</strong> Solder a 10 kΩ resistor bridging <strong>Right Pin 5 (IO34)</strong> and <strong>Right Pin 1 (V3V3)</strong>. ESP32 GPIO 34 is input-only and has NO internal pull-up!
+              <strong>Rain Gauge RC Debounce Network (10kΩ + 100nF):</strong> Solder a 10 kΩ resistor bridging <strong>Right Pin 5 (IO34)</strong> and <strong>Right Pin 1 (V3V3)</strong>, and a 100 nF (0.1 µF, code 104, 50V X7R) ceramic capacitor bridging <strong>Right Pin 5 (IO34)</strong> and <strong>Right Pin 2 (GND)</strong>. This 1.0 ms low-pass RC network eliminates mechanical reed switch chatter and false interrupt triggers.
             </li>
             <li>
               <strong>Ultrasonic Sensor 25cm Blind Zone:</strong> Mount the waterproof sonar transducer at least 25 cm above the maximum anticipated flood water surface.
